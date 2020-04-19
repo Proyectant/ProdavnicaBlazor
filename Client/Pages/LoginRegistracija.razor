@@ -1,0 +1,67 @@
+﻿@page "/registracijalogin"
+@using Microsoft.AspNetCore.SignalR.Client
+@using Blazor_shop.Shared
+@inject NavigationManager NM
+@inject Blazored.LocalStorage.ISyncLocalStorageService LS
+
+<h3>RegistracijaLogIn</h3>
+
+@if (Juzer == null)
+{
+    @if (txtDugme == "Registruj se!")
+    {
+        <Login KodPodKomponente="EventHandlerKodRoditelja" KaServeruLogovanje=@LoginRegServer />
+    }
+    else
+    {
+        <Registracija Dodavanje="DodajJuzera" />
+    }
+    <button @onclick="Toggle">@txtDugme</button>
+}
+else
+{
+    <h2>Juzer je tu! </h2>
+}
+@code {
+    public HubConnection LoginRegServer;
+    public User Juzer { get; set; }
+    public string txtDugme { get; set; } = "Registruj se!";
+
+    protected override async Task OnInitializedAsync()
+    {
+        LoginRegServer = new HubConnectionBuilder().WithUrl(NM.ToAbsoluteUri("/habloginreg")).Build();
+
+        if (LS.GetItem<User>("CuvajJuzera") != null)
+        {
+            Juzer = LS.GetItem<User>("CuvajJuzera");
+        }
+
+        await LoginRegServer.StartAsync();
+    }
+
+    public void Toggle()
+    {
+        if (txtDugme == "Registruj se!")
+        {
+            txtDugme = "Uloguj se!";
+        }
+        else
+        {
+            txtDugme = "Registruj se!";
+        }
+    }
+
+    public void DodajJuzera(User novi)
+    {
+        LoginRegServer.SendAsync("PrihvatiKorisnika", novi);
+
+        txtDugme = "Registruj se!";
+    }
+
+    public void EventHandlerKodRoditelja(User nesto)
+    {
+
+        Juzer = nesto;
+        LS.SetItem("CuvajJuzera", Juzer);
+    }
+}

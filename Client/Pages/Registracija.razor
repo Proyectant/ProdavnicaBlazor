@@ -1,0 +1,25 @@
+﻿@using Blazor_shop.Shared
+@using Microsoft.AspNetCore.SignalR.Client
+
+
+<h3>Registracija</h3>
+
+<EditForm Model="@Korisnik" OnValidSubmit="OK">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <p>Username: <InputText @bind-Value="Korisnik.Username" /></p>
+    <p>Password: <InputText @bind-Value="Korisnik.Password" /></p>
+    <button class="btn btn-primary" type="submit">Registruj korisnika</button>
+</EditForm>
+
+@code {
+    public User Korisnik = new User();
+
+    [Parameter]
+    public EventCallback<User> Dodavanje { get; set; }
+
+    public void OK()
+    {
+        Dodavanje.InvokeAsync(Korisnik);
+    }
+}

@@ -1,0 +1,72 @@
+﻿@page "/dodajartikal"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NM
+@using Blazor_shop.Shared;
+  
+
+
+<h3>Dodaj Artikal</h3>
+<EditForm  Model="art" OnValidSubmit="NapraviArtikal" >
+    <dev>
+        <p>SKU </p>
+        <InputText @bind-Value="art.SKU" />
+
+    </dev>  
+    <dev>
+        <p>Naziv </p>
+        <InputText @bind-Value="art.Naziv" />
+    </dev>
+    <dev>
+        <p>Cena </p>
+        <InputNumber @bind-Value="art.Cena" />
+    </dev>
+    <dev>
+        <p>Kolicina </p>
+        <InputNumber @bind-Value="art.Kolicina"/>
+    </dev>
+    <button type="submit">Dodaj</button>
+
+
+</EditForm>
+<button @onclick="PosaljiArtikalServeru">Posalji Serveru</button>
+
+@foreach (Artikal a in PrivremenaLista)
+{
+    <p>@a</p>
+}
+
+
+
+
+@code {
+
+    public HubConnection KonekcijaDodajArtikal;
+    public Artikal art = new Artikal();
+    List<Artikal> PrivremenaLista = new List<Artikal>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        KonekcijaDodajArtikal = new HubConnectionBuilder().
+        WithUrl(NM.ToAbsoluteUri("/habdodajartikal")).Build();
+
+        await KonekcijaDodajArtikal.StartAsync();
+    }
+
+
+
+    public void NapraviArtikal()
+    {
+        PrivremenaLista.Add(new Artikal(art.SKU, art.Naziv, art.Cena, art.Kolicina));
+        art = new Artikal();
+    }
+
+    public void PosaljiArtikalServeru()
+    {
+        KonekcijaDodajArtikal.SendAsync("PrihvatiArtikal", PrivremenaLista);
+        PrivremenaLista.Clear();
+    }
+
+
+
+}

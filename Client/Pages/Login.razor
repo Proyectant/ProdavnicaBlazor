@@ -1,0 +1,27 @@
+﻿@using Blazor_shop.Shared
+@using Microsoft.AspNetCore.SignalR.Client
+
+
+<h3>Login</h3>
+<EditForm Model="@zaLogovanje" OnSubmit="Submit">
+    <p>Username: <InputText @bind-Value="zaLogovanje.Username" /></p>
+    <p>Password: <InputText @bind-Value="zaLogovanje.Password" type="password" /></p>
+    <button class="btn btn-primary" type="submit"> Log In</button>
+</EditForm>
+
+@code {
+    public User zaLogovanje { get; set; } = new User();
+
+    [Parameter]
+    public HubConnection KaServeruLogovanje { get; set; }
+
+    [Parameter]
+    public EventCallback<User> KodPodKomponente { get; set; }
+
+    public void Submit()
+    {
+        KaServeruLogovanje.On<User>("EvoJuzera", us => KodPodKomponente.InvokeAsync(us));
+        KaServeruLogovanje.SendAsync("ProveriKorisnika", zaLogovanje);
+    }
+
+}

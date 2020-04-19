@@ -1,0 +1,59 @@
+﻿@page "/korpa"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NM
+@using Blazor_shop.Shared
+@inject Blazored.LocalStorage.ISyncLocalStorageService LS
+
+<h3>Korpa</h3>
+
+<div>
+    <table class="table">
+
+        <tr>
+            <td></td>
+            <td>SKU</td>
+            <td>Naziv</td>
+            <td>Cena</td>
+            <td>Kolicina</td>
+        </tr>
+
+        @foreach (Artikal a in SacuvaniArtikli)
+        {
+
+            <tr>
+                <button>-</button>
+                <td>@a.SKU</td>
+                <td>@a.Naziv</td>
+                <td>@a.Cena</td>
+                <td>@a.Kolicina</td>
+            </tr>
+
+
+
+        }
+    </table>
+</div>
+<button @onclick="DodajURacun">IzradiRacun</button>
+
+
+@code
+{ 
+
+    List<Artikal> SacuvaniArtikli = new List<Artikal>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(LS.ContainKey("CuvajKorpu")) //Da li LocalStorage sadrzi "CuvajKorpu"
+        {
+            SacuvaniArtikli = LS.GetItem<List<Artikal>>("CuvajKorpu"); //ako sadrzi onda dodaj sve u listu SacuvaniArtikli
+        }
+
+
+    }
+
+    public void DodajURacun()
+    {
+
+    }
+
+}

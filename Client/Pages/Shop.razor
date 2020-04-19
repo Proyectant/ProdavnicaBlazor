@@ -1,0 +1,81 @@
+﻿@page "/shop" 
+@using Microsoft.AspNetCore.SignalR.Client;
+@using Blazor_shop.Shared;
+@inject NavigationManager NM 
+@inject Blazored.LocalStorage.ISyncLocalStorageService LS
+ 
+
+<h3>Shop</h3>
+<div>
+    <table class="table">
+
+        <tr>
+            <td></td>
+            <td>SKU</td>
+            <td>Naziv</td>
+            <td>Cena</td>
+            <td>Kolicina</td>
+        </tr>
+
+        @foreach (Artikal a in PrivremenaLista)
+        {
+            
+            <tr>
+                <button @onclick="(()=>DodajUKorpu(a))">+</button>
+                <td>@a.SKU</td>
+                <td>@a.Naziv</td>
+                <td>@a.Cena</td>
+                <td>@a.Kolicina</td>
+            </tr>
+
+
+
+        }
+    </table>
+</div>
+
+<p>@ListaZaKorpu.Count</p>
+
+
+
+
+
+
+
+@code 
+
+{
+    public HubConnection OdShopKaServeru;
+    public List<Artikal> PrivremenaLista = new List<Artikal>();
+    public Artikal art = new Artikal();
+
+    public List<Artikal> ListaZaKorpu = new List<Artikal>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        OdShopKaServeru = new HubConnectionBuilder().WithUrl(NM.ToAbsoluteUri("/habshop")).Build();
+        await OdShopKaServeru.StartAsync();
+
+        OdShopKaServeru.On<List<Artikal>>("SaljeServer", listaArtikala =>  //sintaksa da procitamo podatke sa servera 
+        {
+            PrivremenaLista = listaArtikala;
+            StateHasChanged();
+
+        });
+
+        await OdShopKaServeru.SendAsync("KaServeru");  //pozivamo metodu "KaServeru" koja se nalazi na hubshop.cs
+
+    }
+
+    public void DodajUKorpu(Artikal a)
+    {
+        Artikal pomocniArtikal = new Artikal(a.SKU,a.Naziv,a.Cena,a.Kolicina);
+        ListaZaKorpu.Add(pomocniArtikal);
+        LS.SetItem("CuvajKorpu", ListaZaKorpu);  //LocalStorage puni "CuvajKorpu" listom ListaZaKorpu
+    }
+
+
+
+}
